@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record model="ir.actions.act_window" id="action_ship">
+            <field name="name">Ship</field>
+            <field name="res_model">ship.ship1</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Ship" id="menu_ship" parent="base.menu_base_config"
+            sequence="1" action="action_ship"/>
+
+        <record model="ir.ui.view" id="action_tree_view">
+            <field name="name">ship.order.tree</field>
+            <field name="model">ship.ship1</field>
+            <field name="arch" type="xml">
+                    <tree >
+                        <field name="IMO"/>
+                        <field name="Hull_Number"/>
+                        <field name="Engine_Number"/>
+                        <field name="Vessel_Name"/>
+                        <field name="Build_Year"/>
+                        <field name="Ship_Yard"/>
+                        <field name="Ship_Owner"/>
+                        <field name="Ship_Management"/>
+                        <field name="Engine_Builder"/>
+                    </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="action_form_view">
+            <field name="name">ship.order.form</field>
+            <field name="model">ship.ship1</field>
+            <field name="arch" type="xml">
+                <form string="Ship">
+                        <sheet>
+                        <group>
+                            <group>
+                            <field name="IMO"/>
+                            <field name="Hull_Number"/>
+                            <field name="Engine_Number"/>
+                            <field name="Vessel_Name"/>
+                            <field name="Build_Year"/>
+                            <field name="Ship_Yard"/>
+                            <field name="Ship_Owner"/>
+                            <field name="Ship_Management"/>
+                            <field name="Engine_Builder"/>
+                            </group>
+                        </group>
+                        </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="action_sale_form_view">
+            <field name="name">sale.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+
+                <xpath
+                    expr="//form/sheet/group/group/field[@name='client_order_ref']" position="after">
+                    <field name="project"/>
+                    <field name="contract_no"/>
+                    <field name="ship"/>
+                    <button name="update_order" string="Update to Order Lines" type="object" context="{'ship':'ship'}"/>
+                </xpath>
+
+                <xpath
+                    expr="//form/sheet/group/group/field[@name='project_id']" position="after">
+                    <field name="order_type"/>
+                    <field name="staff"/>
+                </xpath>
+
+                <xpath
+                    expr="//sheet/group/group/field[@name='project_id']" position="replace">
+                    <field name="project_id"/>
+                </xpath>
+
+                <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
+                    <field name="ship"/>
+                </xpath >
+
+                <xpath expr="//form/sheet/notebook/page[@string='Other Information']" position="after">
+                    <page string="Related Purchase Orders">
+                        <field name="related_purchase">
+                        <tree>
+                            <field name="date_order"/>
+                            <field name="partner_id"/>
+                            <field name="product_id"/>
+                            <field name="state" invisible="1"/>
+                        </tree>
+                        </field>
+                    </page>
+
+                    <page string="Salesman Commision Table">
+                    <field name="related_commission" groups="Ship.group_commission" >
+                    <tree editable='bottom'>
+                        <field name="user"/>
+                        <field name="sales_val"/>
+                        <field name="percent"/>
+                        <field name="commission"/>
+                    </tree>
+                    </field>
+                    </page>
+                </xpath>
+
+                <!--When Creating Customer Invoice, pass the value of “Order Type”, “Staff” from SO to the-->
+                <!--corresponding fields in all invoice lines.-->
+
+
+                <xpath
+                    expr="//form/sheet/notebook" position="after" >
+                    <field name="prepared_by"/>
+                    <button name="update_prepared_by" string="Preparer" type="object" groups="Ship.commision_group_p"/>
+                    <field name="approved_by"/>
+                    <button name="update_approved_by" string="Approver" type="object" groups="Ship.commision_group_a"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="action_sale_tree_view" model="ir.ui.view">
+            <field name="name">sale.tree</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree/field[@name='partner_id']" position="after">
+                    <field name='ship'/>
+                    <field name="project"/>
+                    <field name="contract_no"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="action_purchase_form_view">
+            <field name="name">purchase.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath
+                    expr="//form/sheet/group/group/field[@name='partner_ref']" position="after">
+                    <field name="contract_no"/>
+                    <field name="related_so" on_change="onchange_sale(related_so)"/>
+                </xpath>
+
+                <xpath expr="//field[@name='order_line']/tree/field[@name='product_qty']" position="before">
+                    <field name="order_type"/>
+                    <field name="staff"/>
+                </xpath >
+
+            </field>
+        </record>
+
+        <!--Adding two fields in Customer invoices-->
+
+        <record model="ir.ui.view" id="action_invoice_form_view">
+            <field name="name">invoice.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='invoice_line']/tree/field[@name='quantity']" position="before">
+                    <field name="order_type"/>
+                    <field name="staff"/>
+                </xpath>
+
+            </field>
+        </record>
+
+
+
+        <record id="action_purchase_tree_view" model="ir.ui.view">
+            <field name="name">purchase.tree</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//tree/field[@name='partner_id']" position="after">
+                    <field name='related_so'/>
+                </xpath>
+
+            </field>
+        </record>
+
+        <!--Adding Commission group -->
+        <record id="group_commission" model="res.groups">
+            <field name="name">Commission Group</field>
+        </record>
+        <!--Adding two groups commission prepaeration and commission approval-->
+
+        <record id="commision_group_p" model="res.groups">
+            <field name="name"> Commision Preparation</field>
+        </record>
+        <record id="commision_group_a" model="res.groups">
+            <field name="name"> Commision Approval</field>
+         </record>
+
+        <report
+                    string=" Sample Purchase Report"
+                    id="action_sample_report"
+                    model="purchase.order"
+                    report_type="qweb-pdf"
+                    name="Ship.report_samplereport"
+                    file="Ship.report_samplereport"
+                />
+    </data>
+</openerp>

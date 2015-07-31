@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <!--Adding order type and staff in tree and form view of journal item in accounting-->
+        <record model="ir.ui.view" id="action_journel_form_view">
+            <field name="name">journel.form</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_move_line_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@string='Analytic']" position="inside">
+                    <field name="order_type"/>
+                    <field name="staff"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="action_journel_tree_view" >
+            <field name="name">journel.tree</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_move_line_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree/field[@name='analytic_account_id']" position="after">
+                    <field name="order_type"/>
+                    <field name="staff"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <!-- Create new activity for the new state -->
+        <record id="act_to_check" model="workflow.activity">
+            <field name="wkf_id" ref="sale.wkf_sale"/>
+            <field name="name">to_check</field>
+            <field name="kind">function</field>
+            <field name="action">menu_tocheck()</field>
+        </record>
+
+        <record id="act_checked" model="workflow.activity">
+            <field name="wkf_id" ref="sale.wkf_sale"/>
+            <field name="name">checked</field>
+            <field name="kind">function</field>
+            <field name="action">menu_checked()</field>
+        </record>
+
+        <record id="act_approved" model="workflow.activity">
+            <field name="wkf_id" ref="sale.wkf_sale"/>
+            <field name="name">approved</field>
+            <field name="kind">function</field>
+            <field name="action">menu_approved()</field>
+        </record>
+
+        <!-- Create transitions -->
+        <!-- From Draft to to check -->
+        <record id="sale.trans_draft_router" model="workflow.transition">
+            <field name="act_from" ref="sale.act_draft"/>
+            <field name="act_to" ref="act_to_check"/>
+            <field name="signal">signal_to_check_forward</field>
+        </record>
+
+        <!-- From tocheck to checked -->
+        <record id="trans_tocheck_checked" model="workflow.transition">
+            <field name="act_from" ref="act_to_check"/>
+            <field name="act_to" ref="act_checked"/>
+            <field name="signal">signal_checked</field>
+        </record>
+
+        <!-- From checked to approved -->
+        <record id="trans_checked_approved" model="workflow.transition">
+            <field name="act_from" ref="act_checked"/>
+            <field name="act_to" ref="act_approved"/>
+            <field name="signal">signal_approved</field>
+        </record>
+
+        <!-- From approved to confirm order -->
+        <record id="trans_approved_confirm_order" model="workflow.transition">
+            <field name="act_from" ref="act_approved"/>
+            <field name="act_to" ref="sale.act_router"/>
+            <field name="signal">signal_confirm_order</field>
+        </record>
+
+
+
+        <!-- Inherit the sale order model's form view and customize -->
+        <record id="sale_form_view" model="ir.ui.view">
+            <field name="name">sale.order.form.inherit</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <button name="action_button_confirm" states="draft" string="Confirm Sale" type="object" groups="base.group_user" position="replace"/>
+
+                <!-- Statusbar widget should also contain the new statuses -->
+                <field name="state" position="replace">
+                    <field name="state" widget="statusbar" statusbar_visible="draft,to_check,checked,approved,sent,invoiced,done" statusbar_colors='{"invoice_except":"red","waiting_date":"blue"}'/>
+                </field>
+
+
+
+                <field name="state" position="before">
+
+                    <!-- From draft to tocheck -->
+                    <button string="To Check" type="workflow" name="signal_to_check_forward" states="draft" class="oe_highlight"/>
+
+                    <!-- From to check to checked -->
+                    <button string="Checked" type="workflow" name="signal_checked" states="to_check" class="oe_highlight"/>
+
+                    <!-- From checked to approved -->
+                    <button string="Approve" type="workflow"  name="signal_approved" states="checked" class="oe_highlight"/>
+
+                    <!-- From approved to confirm -->
+                    <button string="Confirm Order" type="workflow"  name="signal_confirm_order" states="approved" class="oe_highlight"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</openerp>

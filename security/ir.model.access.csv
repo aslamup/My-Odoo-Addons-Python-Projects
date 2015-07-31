@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+commission_preparation,prepared_by,model_sale_order,Ship.commision_group_p,1,1,1,0
+commission_approval,approved_by,model_sale_order,Ship.commision_group_a,1,1,1,0
+access_ship_ship1,access_ship_ship1,model_ship_ship1,,1,1,1,1
+access_salesman_commission,access_salesman_commission,model_salesman_commission,,1,1,1,1
